@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Tính điểm Cầu lông</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            touch-action: manipulation;
+        }
+        .score-button {
+            transition: transform 0.1s ease, background-color 0.2s ease;
+        }
+        .score-button:active {
+            transform: scale(0.95);
+        }
+        .server-indicator {
+            transition: all 0.3s ease-in-out;
+        }
+        #shuttle-icon {
+            filter: drop-shadow(0 2px 3px rgba(0,0,0,0.5));
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-white flex items-center justify-center min-h-screen p-2 sm:p-4">
+
+    <!-- App container with responsive max-width -->
+    <div id="app" class="relative w-full max-w-md md:max-w-4xl lg:max-w-5xl mx-auto bg-gray-800 rounded-2xl shadow-2xl p-4 sm:p-6 overflow-hidden">
+        
+        <!-- Main content area with responsive layout (vertical on mobile, horizontal on desktop/landscape) -->
+        <div id="main-content" class="md:flex md:flex-row md:gap-6">
+            
+            <!-- Left/Top Panel: Controls and Info -->
+            <div class="flex flex-col space-y-4 md:w-1/2 lg:w-2/5">
+                <!-- Header: Tiêu đề và Chuyển đổi Chế độ -->
+                <header class="text-center">
+                    <h1 class="text-2xl sm:text-3xl font-bold text-cyan-400">Bảng điểm Cầu lông</h1>
+                    <div class="mt-4 bg-gray-700 rounded-full p-1 flex">
+                        <button id="mode-singles" class="w-1/2 py-2 text-sm font-semibold rounded-full focus:outline-none transition-colors">Đánh Đơn</button>
+                        <button id="mode-doubles" class="w-1/2 py-2 text-sm font-semibold rounded-full focus:outline-none transition-colors">Đánh Đôi</button>
+                    </div>
+                </header>
+
+                <!-- Tỷ số Ván đấu -->
+                <div class="flex justify-around items-center pt-2">
+                    <div class="text-center">
+                        <span id="game-score-a-name" class="text-sm font-semibold text-cyan-400">ĐỘI A</span>
+                        <span id="games-a" class="text-4xl md:text-5xl font-bold text-white block bg-gray-700 rounded-lg px-4 py-1">0</span>
+                    </div>
+                    <span class="text-3xl font-light text-gray-500">-</span>
+                    <div class="text-center">
+                        <span id="game-score-b-name" class="text-sm font-semibold text-yellow-400">ĐỘI B</span>
+                        <span id="games-b" class="text-4xl md:text-5xl font-bold text-white block bg-gray-700 rounded-lg px-4 py-1">0</span>
+                    </div>
+                </div>
+
+                <!-- Player Name Inputs -->
+                <div class="grid grid-cols-2 gap-4">
+                    <input type="text" id="team-a-name-input" placeholder="Tên Đội A" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-500 text-center">
+                    <input type="text" id="team-b-name-input" placeholder="Tên Đội B" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-yellow-500 text-center">
+                </div>
+
+                <!-- Spacer to push footer down in landscape view -->
+                <div class="flex-grow"></div>
+
+                <!-- Status messages and footer -->
+                <div class="space-y-4 mt-4 md:mt-0">
+                    <div id="server-info" class="text-center h-6 text-sm font-medium text-gray-300">Bắt đầu trận đấu</div>
+                    <div id="status-message" class="text-center h-8 flex items-center justify-center font-semibold text-lg"></div>
+
+                    <footer class="grid grid-cols-2 gap-4">
+                        <button id="reset-game-btn" class="w-full bg-gray-600 hover:bg-gray-500 text-white font-bold py-3 rounded-lg transition-colors">Ván mới</button>
+                        <button id="reset-match-btn" class="w-full bg-red-600 hover:bg-red-500 text-white font-bold py-3 rounded-lg transition-colors">Chơi lại</button>
+                    </footer>
+                </div>
+            </div>
+
+            <!-- Right/Bottom Panel: Badminton Court -->
+            <div class="mt-4 md:mt-0 md:w-1/2 lg:w-3/5 flex items-center justify-center">
+                <main class="relative aspect-[9/16] w-full max-w-sm mx-auto bg-green-800 border-4 border-gray-300 rounded-lg p-1.5 flex flex-col shadow-inner">
+                    <svg id="shuttle-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6 absolute text-white opacity-0 transition-all duration-500 ease-in-out z-30 transform -translate-x-1/2 -translate-y-1/2">
+                        <path fill-rule="evenodd" d="M4.5 9.375c0-1.036.84-1.875 1.875-1.875h9.25c1.036 0 1.875.84 1.875 1.875v1.004c0 .856-.513 1.603-1.28 1.933a11.96 11.96 0 01-1.282 4.144c-.21.613-.674 1.12-1.218 1.452a11.94 11.94 0 01-8.626 0c-.544-.332-1.008-.84-1.218-1.452a11.96 11.96 0 01-1.282-4.144A2.25 2.25 0 014.5 10.38V9.375z" clip-rule="evenodd" />
+                    </svg>
+                    
+                    <!-- Net -->
+                    <div class="absolute top-1/2 left-0 right-0 h-0.5 bg-gray-100/70 -translate-y-1/2 z-20"></div>
+                    <div class="absolute top-1/2 left-0 right-0 h-3 border-t border-b border-gray-600 -translate-y-1/2 z-20"></div>
+                    
+                    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10 text-center pointer-events-none">
+                        <span class="text-xl font-black text-white tracking-widest" style="text-shadow: 1px 1px 2px #000;">THE NGUYEN</span>
+                    </div>
+                    <div class="flex-1 relative flex items-center justify-center pt-4">
+                        <div class="absolute top-0 left-0 right-0 bottom-0 border-x-2 border-gray-300"></div>
+                        <div class="absolute top-0 left-[10%] right-[10%] bottom-0 border-x-[2px] border-gray-300"></div>
+                        <div class="absolute top-0 left-0 right-0 h-[40%] border-b-2 border-gray-300"></div>
+                        <div class="absolute bottom-0 left-1/2 -translate-x-1/2 w-[2px] h-[60%] bg-gray-300"></div>
+                        <div class="absolute top-0 left-0 right-0 h-[5%] border-b-2 border-gray-300"></div>
+                        <div class="z-10 text-center">
+                            <span id="team-a-name-display" class="font-bold text-lg text-white" style="text-shadow: 1px 1px 3px #000;">ĐỘI A</span>
+                            <button id="score-a-btn" class="score-button w-24 h-24 sm:w-28 sm:h-28 flex items-center justify-center rounded-full bg-black bg-opacity-25 backdrop-blur-sm mt-1 border-2 border-white/20 relative">
+                                <div id="server-a" class="server-indicator absolute inset-0 rounded-full border-4 border-cyan-400 opacity-0 scale-110"></div>
+                                <span class="text-5xl sm:text-6xl font-black text-white" id="score-a">0</span>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="flex-1 relative flex items-center justify-center pb-4">
+                        <div class="absolute top-0 left-0 right-0 bottom-0 border-x-2 border-gray-300"></div>
+                        <div class="absolute top-0 left-[10%] right-[10%] bottom-0 border-x-[2px] border-gray-300"></div>
+                        <div class="absolute bottom-0 left-0 right-0 h-[40%] border-t-2 border-gray-300"></div>
+                        <div class="absolute top-0 left-1/2 -translate-x-1/2 w-[2px] h-[60%] bg-gray-300"></div>
+                        <div class="absolute bottom-0 left-0 right-0 h-[5%] border-t-2 border-gray-300"></div>
+                        <div class="z-10 text-center">
+                            <button id="score-b-btn" class="score-button w-24 h-24 sm:w-28 sm:h-28 flex items-center justify-center rounded-full bg-black bg-opacity-25 backdrop-blur-sm mb-1 border-2 border-white/20 relative">
+                                <div id="server-b" class="server-indicator absolute inset-0 rounded-full border-4 border-yellow-400 opacity-0 scale-110"></div>
+                                <span class="text-5xl sm:text-6xl font-black text-white" id="score-b">0</span>
+                            </button>
+                            <span id="team-b-name-display" class="font-bold text-lg text-white" style="text-shadow: 1px 1px 3px #000;">ĐỘI B</span>
+                        </div>
+                    </div>
+                </main>
+            </div>
+        </div>
+
+        <!-- Match Summary Modal -->
+        <div id="summary-modal" class="absolute inset-0 bg-gray-900 bg-opacity-95 z-50 flex items-center justify-center p-4 hidden">
+            <div class="bg-gray-800 rounded-2xl shadow-2xl p-6 text-center w-full max-w-sm">
+                <h2 class="text-2xl font-bold text-cyan-400 mb-2">KẾT QUẢ TRẬN ĐẤU</h2>
+                <p id="final-winner" class="text-lg font-semibold mb-4"></p>
+                <div class="text-6xl font-black mb-6">
+                    <span id="final-games-a">0</span> - <span id="final-games-b">0</span>
+                </div>
+                <div id="set-scores-summary" class="space-y-2 text-left mb-6 bg-gray-700 p-4 rounded-lg">
+                    <!-- Set scores will be dynamically inserted here -->
+                </div>
+                <button id="play-again-btn" class="w-full bg-red-600 hover:bg-red-500 text-white font-bold py-3 rounded-lg transition-colors">Chơi lại từ đầu</button>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const mainContent = document.getElementById('main-content');
+            const summaryModal = document.getElementById('summary-modal');
+            const finalWinner = document.getElementById('final-winner');
+            const finalGamesA = document.getElementById('final-games-a');
+            const finalGamesB = document.getElementById('final-games-b');
+            const setScoresSummary = document.getElementById('set-scores-summary');
+            const playAgainBtn = document.getElementById('play-again-btn');
+
+            const modeSinglesBtn = document.getElementById('mode-singles');
+            const modeDoublesBtn = document.getElementById('mode-doubles');
+            const scoreABtn = document.getElementById('score-a-btn');
+            const scoreBBtn = document.getElementById('score-b-btn');
+            const resetGameBtn = document.getElementById('reset-game-btn');
+            const resetMatchBtn = document.getElementById('reset-match-btn');
+            const teamANameInput = document.getElementById('team-a-name-input');
+            const teamBNameInput = document.getElementById('team-b-name-input');
+            const scoreADisplay = document.getElementById('score-a');
+            const scoreBDisplay = document.getElementById('score-b');
+            const gamesADisplay = document.getElementById('games-a');
+            const gamesBDisplay = document.getElementById('games-b');
+            const serverAIndicator = document.getElementById('server-a');
+            const serverBIndicator = document.getElementById('server-b');
+            const serverInfoDisplay = document.getElementById('server-info');
+            const statusMessageDisplay = document.getElementById('status-message');
+            const teamANameDisplay = document.getElementById('team-a-name-display');
+            const teamBNameDisplay = document.getElementById('team-b-name-display');
+            const gameScoreAName = document.getElementById('game-score-a-name');
+            const gameScoreBName = document.getElementById('game-score-b-name');
+            const shuttleIcon = document.getElementById('shuttle-icon');
+
+            let state = {
+                scoreA: 0, scoreB: 0, gamesA: 0, gamesB: 0,
+                server: null, gameMode: 'doubles', isGameOver: false, isMatchOver: false,
+                nameA: 'ĐỘI A', nameB: 'ĐỘI B',
+                setScores: [],
+            };
+
+            function updateUI() {
+                if(state.isMatchOver) {
+                    mainContent.classList.add('hidden');
+                    summaryModal.classList.remove('hidden');
+
+                    const winnerName = state.gamesA > state.gamesB ? state.nameA : state.nameB;
+                    finalWinner.textContent = `${winnerName.toUpperCase()} THẮNG CHUNG CUỘC!`;
+                    finalGamesA.textContent = state.gamesA;
+                    finalGamesB.textContent = state.gamesB;
+
+                    setScoresSummary.innerHTML = '';
+                    state.setScores.forEach((score, index) => {
+                        const setDiv = document.createElement('div');
+                        setDiv.className = 'flex justify-between items-center text-gray-300';
+                        setDiv.innerHTML = `
+                            <span class="font-semibold">Ván ${index + 1}</span>
+                            <span class="font-bold text-white">${score.a} - ${score.b}</span>
+                        `;
+                        setScoresSummary.appendChild(setDiv);
+                    });
+                    return;
+                }
+                
+                mainContent.classList.remove('hidden');
+                summaryModal.classList.add('hidden');
+                
+                scoreADisplay.textContent = state.scoreA;
+                scoreBDisplay.textContent = state.scoreB;
+                gamesADisplay.textContent = state.gamesA;
+                gamesBDisplay.textContent = state.gamesB;
+                teamANameDisplay.textContent = state.nameA;
+                teamBNameDisplay.textContent = state.nameB;
+                gameScoreAName.textContent = state.nameA;
+                gameScoreBName.textContent = state.nameB;
+
+                if (state.gameMode === 'singles') {
+                    modeSinglesBtn.classList.add('bg-cyan-500', 'text-white');
+                    modeSinglesBtn.classList.remove('text-gray-300');
+                    modeDoublesBtn.classList.remove('bg-cyan-500', 'text-white');
+                } else {
+                    modeDoublesBtn.classList.add('bg-cyan-500', 'text-white');
+                    modeDoublesBtn.classList.remove('text-gray-300');
+                    modeSinglesBtn.classList.remove('bg-cyan-500', 'text-white');
+                }
+                
+                serverAIndicator.style.opacity = state.server === 'A' ? '1' : '0';
+                serverBIndicator.style.opacity = state.server === 'B' ? '1' : '0';
+
+                if (state.isGameOver) {
+                    serverInfoDisplay.textContent = '';
+                } else if (state.server) {
+                    const servingTeam = state.server === 'A' ? state.nameA : state.nameB;
+                    const currentScore = state.server === 'A' ? state.scoreA : state.scoreB;
+                    const courtSide = currentScore % 2 === 0 ? 'sân Chẵn' : 'sân Lẻ';
+                    serverInfoDisplay.textContent = `${servingTeam} giao cầu từ ${courtSide}`;
+                } else {
+                    serverInfoDisplay.textContent = 'Chọn đội ghi điểm để bắt đầu';
+                }
+
+                if (state.server) {
+                    shuttleIcon.style.opacity = '1';
+                    const score = state.server === 'A' ? state.scoreA : state.scoreB;
+                    const isEven = score % 2 === 0;
+                    if (state.server === 'A') {
+                        shuttleIcon.style.top = '25%';
+                        shuttleIcon.style.left = isEven ? '75%' : '25%';
+                    } else {
+                        shuttleIcon.style.top = '75%';
+                        shuttleIcon.style.left = isEven ? '25%' : '75%';
+                    }
+                } else {
+                    shuttleIcon.style.opacity = '0';
+                }
+
+                const buttonsDisabled = state.isGameOver || state.isMatchOver;
+                scoreABtn.disabled = buttonsDisabled;
+                scoreBBtn.disabled = buttonsDisabled;
+                scoreABtn.classList.toggle('opacity-50', buttonsDisabled);
+                scoreBBtn.classList.toggle('opacity-50', buttonsDisabled);
+                resetGameBtn.classList.toggle('hidden', !state.isGameOver || state.isMatchOver);
+            }
+            
+            function handlePoint(team) {
+                if (state.isGameOver || state.isMatchOver) return;
+                state.server = team;
+                team === 'A' ? state.scoreA++ : state.scoreB++;
+                checkForWin();
+                updateUI();
+            }
+            
+            function checkForWin() {
+                const { scoreA, scoreB, nameA, nameB } = state;
+                let winner = null;
+
+                if ((scoreA >= 21 && scoreA - scoreB >= 2) || scoreA === 30) winner = 'A';
+                else if ((scoreB >= 21 && scoreB - scoreA >= 2) || scoreB === 30) winner = 'B';
+
+                if (winner) {
+                    state.isGameOver = true;
+                    state.setScores.push({ a: state.scoreA, b: state.scoreB });
+                    
+                    if (winner === 'A') {
+                        state.gamesA++;
+                        statusMessageDisplay.textContent = `${nameA.toUpperCase()} THẮNG VÁN NÀY!`;
+                    } else {
+                        state.gamesB++;
+                        statusMessageDisplay.textContent = `${nameB.toUpperCase()} THẮNG VÁN NÀY!`;
+                    }
+                    
+                    if(state.gamesA === 2 || state.gamesB === 2) {
+                        state.isMatchOver = true;
+                    }
+                } else {
+                    if (scoreA >= 20 && scoreA > scoreB) statusMessageDisplay.textContent = `Game point cho ${nameA}!`;
+                    else if (scoreB >= 20 && scoreB > scoreA) statusMessageDisplay.textContent = `Game point cho ${nameB}!`;
+                    else if (scoreA >= 20 && scoreA === scoreB) statusMessageDisplay.textContent = 'Deuce!';
+                    else statusMessageDisplay.textContent = '';
+                }
+            }
+
+            function startNextSet() {
+                state.scoreA = 0;
+                state.scoreB = 0;
+                state.isGameOver = false;
+                state.server = null;
+                statusMessageDisplay.textContent = '';
+                updateUI();
+            }
+
+            function resetMatch() {
+                Object.assign(state, {
+                    scoreA: 0, scoreB: 0, gamesA: 0, gamesB: 0,
+                    server: null, isGameOver: false, isMatchOver: false,
+                    setScores: [],
+                });
+                statusMessageDisplay.textContent = '';
+                serverInfoDisplay.textContent = 'Bắt đầu trận đấu';
+                updateUI();
+            }
+
+            function switchMode(mode) {
+                if (state.gameMode !== mode) {
+                    state.gameMode = mode;
+                    state.nameA = 'ĐỘI A';
+                    state.nameB = 'ĐỘI B';
+                    teamANameInput.value = '';
+                    teamBNameInput.value = '';
+                    resetMatch();
+                }
+            }
+            
+            scoreABtn.addEventListener('click', () => handlePoint('A'));
+            scoreBBtn.addEventListener('click', () => handlePoint('B'));
+            resetGameBtn.addEventListener('click', startNextSet);
+            resetMatchBtn.addEventListener('click', resetMatch);
+            playAgainBtn.addEventListener('click', resetMatch);
+            modeSinglesBtn.addEventListener('click', () => switchMode('singles'));
+            modeDoublesBtn.addEventListener('click', () => switchMode('doubles'));
+            teamANameInput.addEventListener('input', (e) => {
+                state.nameA = e.target.value.trim().toUpperCase() || 'ĐỘI A';
+                updateUI();
+            });
+            teamBNameInput.addEventListener('input', (e) => {
+                state.nameB = e.target.value.trim().toUpperCase() || 'ĐỘI B';
+                updateUI();
+            });
+
+            resetMatch();
+        });
+    </script>
+</body>
+</html>
+
